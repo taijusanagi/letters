@@ -4,7 +4,7 @@ import * as path from "path";
 import * as chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { ethers } from "hardhat";
-import { CONTRACT_NAME, CONTRACT_SYMBOL } from "../helpers/constants";
+import { CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, FEE_BPS, SUPPLY_LIMIT } from "../helpers/constants";
 import { deployLetters } from "../helpers/migrations";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -22,19 +22,22 @@ describe("Letters", function () {
 
   const letterString = "Hi.";
   const letterBytes32 = ethers.utils.formatBytes32String(letterString);
-  const firstTokenId = 0;
-  const lastTokenId = 16384;
+  const ownerTokenId = 0;
+  const firstTokenId = 1;
 
   this.beforeEach("initialization.", async function () {
     [signer, to] = await ethers.getSigners();
     lettersContract = await deployLetters();
   });
+
   it("interface check", async function () {
     expect(await lettersContract.name()).to.equal(CONTRACT_NAME);
     expect(await lettersContract.symbol()).to.equal(CONTRACT_SYMBOL);
+    expect(await lettersContract.getName(ownerTokenId)).to.equal(CONTRACT_NAME);
+    expect(await lettersContract.ownerOf(ownerTokenId)).to.equal(OWNER_ADDRESS);
   });
 
-  it("mint ", async function () {
+  it("mint", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
     expect(await lettersContract.ownerOf(firstTokenId)).to.equal(to.address);
   });
@@ -44,24 +47,18 @@ describe("Letters", function () {
     await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith("letter has been sent");
   });
 
-  it("cannot mint when receiver box is closed", async function () {
-    await lettersContract.connect(to).closeReceiveBox();
-    await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith("receive box closed");
-  });
-
-  it("cannot transfer when receiver box is closed", async function () {
-    await lettersContract.sendLetter(signer.address, letterBytes32);
-    await lettersContract.connect(to).closeReceiveBox();
-    await expect(lettersContract.transferFrom(signer.address, to.address, firstTokenId)).to.revertedWith(
-      "receive box closed"
-    );
-  });
-
-  it("should able to receive after closing then opening", async function () {
-    await lettersContract.connect(to).closeReceiveBox();
-    await lettersContract.connect(to).openReceiveBox();
+  it("getFeeBps", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    expect(await lettersContract.ownerOf(firstTokenId)).to.equal(to.address);
+    const feeBps = await lettersContract.getFeeBps(firstTokenId);
+    expect(feeBps[0]).to.equal(FEE_BPS[0]);
+    expect(feeBps[1]).to.equal(FEE_BPS[1]);
+  });
+
+  it("getFeeRecipients", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const feeBps = await lettersContract.getFeeRecipients(firstTokenId);
+    expect(feeBps[0]).to.equal(OWNER_ADDRESS);
+    expect(feeBps[1]).to.equal(signer.address);
   });
 
   it("getName", async function () {
@@ -98,6 +95,20 @@ describe("Letters", function () {
     expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
   });
 
+  it("getProvenance", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const metadata = await lettersContract.getMetaData(firstTokenId);
+    const expected = ethers.utils.sha256(Buffer.from(metadata));
+    expect(await lettersContract.getProvenance(firstTokenId)).to.equal(expected);
+  });
+
+  it("getCid", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const metadata = await lettersContract.getMetaData(firstTokenId);
+    const cid = await ipfsOnlyHash.of(Buffer.from(metadata));
+    expect(await lettersContract.getCid(firstTokenId)).to.equal(cid);
+  });
+
   it("tokenURI", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
     const metadata = await lettersContract.getMetaData(firstTokenId);
@@ -114,17 +125,18 @@ describe("Letters", function () {
   });
 
   // this is only used once to make sure supply limit is working
-  it.skip("cannot mint more than limit", async function () {
-    for (let i = 0; i <= lastTokenId + 1; i++) {
-      console.log(i);
-      if (i <= lastTokenId) {
-        const loopedLetterBytes = ethers.utils.formatBytes32String(i.toString());
-        await lettersContract.sendLetter(to.address, loopedLetterBytes);
-      } else {
-        await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith(
-          "all letters have been sent"
-        );
-      }
+  it.only("cannot mint more than limit", async function () {
+    for (let i = 1; i < SUPPLY_LIMIT + 1; i++) {
+      console.log("mint", i);
+      const loopedLetterBytes = ethers.utils.formatBytes32String(i.toString());
+      await lettersContract.sendLetter(to.address, loopedLetterBytes);
     }
+    let concatenated = await lettersContract.getProvenance(0);
+    for (let i = 1; i <= SUPPLY_LIMIT; i++) {
+      console.log("provenance", i);
+      const provenence = await lettersContract.getProvenance(i);
+      concatenated = ethers.utils.sha256(concatenated + provenence.substring(2, 66));
+    }
+    expect(await lettersContract.LETTERS_PROVENANCE()).to.equal(concatenated);
   });
 });

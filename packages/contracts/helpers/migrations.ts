@@ -3,7 +3,7 @@ import * as path from "path";
 import hre, { ethers } from "hardhat";
 
 import networks from "../networks.json";
-import { CONTRACT_NAME, CONTRACT_SYMBOL } from "./constants";
+import { CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, FEE_BPS, SUPPLY_LIMIT } from "./constants";
 import { NetworkName } from "./types";
 
 export const filePath = "../networks.json";
@@ -21,7 +21,9 @@ export const updateJson = (contractName: string, address: string) => {
 export const deployLetters = async () => {
   const contractName = "Letters";
   const Contract = await ethers.getContractFactory(contractName);
-  const contract = await Contract.deploy(CONTRACT_NAME, CONTRACT_SYMBOL, { gasPrice });
+  const contract = await Contract.deploy(CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, SUPPLY_LIMIT, FEE_BPS, {
+    gasPrice,
+  });
   networkName != "localhost" && console.log(contractName, "deployed at", contract.address);
   updateJson(contractName, contract.address);
   return contract;
