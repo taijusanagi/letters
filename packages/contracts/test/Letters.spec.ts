@@ -35,6 +35,26 @@ describe("Letters", function () {
     await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith("letter has been sent");
   });
 
+  it("cannot mint when receiver box is closed", async function () {
+    await lettersContract.connect(to).closeReceiveBox();
+    await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith("receive box closed");
+  });
+
+  it("cannot transfer when receiver box is closed", async function () {
+    await lettersContract.sendLetter(signer.address, letterBytes32);
+    await lettersContract.connect(to).closeReceiveBox();
+    await expect(lettersContract.transferFrom(signer.address, to.address, firstTokenId)).to.revertedWith(
+      "receive box closed"
+    );
+  });
+
+  it("should able to receive after closing then opening", async function () {
+    await lettersContract.connect(to).closeReceiveBox();
+    await lettersContract.connect(to).openReceiveBox();
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    expect(await lettersContract.ownerOf(firstTokenId)).to.equal(to.address);
+  });
+
   it("getName", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
     expect(await lettersContract.getName(firstTokenId)).to.equal(letterString);

@@ -19,10 +19,31 @@ contract Letters is ERC721, IHasSecondarySaleFees {
     mapping(uint256 => address payable[]) public fromMemory;
     mapping(bytes32 => bool) public letterHasBeenSent;
 
+    mapping(address => bool) public receiveBoxClosed;
+
     uint256 public constant lastTokenId = 16384;
     uint256[] public feeBps = [1000];
 
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+
+    function _beforeTokenTransfer(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) internal virtual override {
+        super._beforeTokenTransfer(_from, _to, _tokenId);
+        require(!receiveBoxClosed[_to], "receive box closed");
+    }
+
+    function closeReceiveBox() public {
+        require(!receiveBoxClosed[msg.sender], "already closed");
+        receiveBoxClosed[msg.sender] = true;
+    }
+
+    function openReceiveBox() public {
+        require(receiveBoxClosed[msg.sender], "already opened");
+        receiveBoxClosed[msg.sender] = false;
+    }
 
     function sendLetter(address _to, bytes32 _letter) public {
         bytes32 digest = keccak256(abi.encodePacked(msg.sender, _letter));
