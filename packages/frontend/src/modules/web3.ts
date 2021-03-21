@@ -2,24 +2,19 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import Web3 from "web3";
 import Web3Modal from "web3modal";
-import { abi as chocofactoryAbi } from "../../../contracts/artifacts/contracts/Chocofactory.sol/Chocofactory.json";
-import { abi as chocomoldAbi } from "../../../contracts/artifacts/contracts/Chocomold.sol/Chocomold.json";
-import chainIdConfig from "../../../contracts/chainId.json";
-import { NetworkName, ChainId } from "../../../contracts/helpers/types";
-import networkConfig from "../../../contracts/network.json";
-import { Chocomold, Chocofactory } from "../../../contracts/typechain";
-
-export { NULL_ADDRESS } from "../../../contracts/helpers/constants";
+import { abi as lettersAbi } from "../../../contracts/artifacts/contracts/Letters.sol/Letters.json";
+import chainIdConfig from "../../../contracts/chainIds.json";
+import { NetworkName } from "../../../contracts/helpers/types";
+import networkConfig from "../../../contracts/networks.json";
+import { Letters } from "../../../contracts/typechain";
 
 export const chainIdLabels =
   process.env.NODE_ENV == "development"
-    ? ["Local", "Rinkeby", "Matic Test", "BSC Test", "BSC", "Matic", "Mainnet"]
+    ? ["Rinkeby", "BSC", "Matic", "Mainnet", "Local"]
     : ["Rinkeby", "BSC", "Matic", "Mainnet"];
 
 export const chainIdValues =
-  process.env.NODE_ENV == "development"
-    ? (["31337", "4", "80001", "97", "56", "137", "1"] as ChainId[])
-    : (["4", "56", "137", "1"] as ChainId[]);
+  process.env.NODE_ENV == "development" ? ["4", "56", "137", "1", "31337"] : ["4", "56", "137", "1"];
 
 export const providerOptions = {
   walletconnect: {
@@ -54,15 +49,14 @@ export const getWeb3 = async (provider: any) => {
   return new Web3(provider);
 };
 
-export const getNetworkNameFromChainId = (chainId: string): NetworkName => {
-  return chainIdConfig[chainId as ChainId] as NetworkName;
+export const getNetworkNameFromChainId = (chainId: any): NetworkName => {
+  return chainIdConfig[chainId] as NetworkName;
 };
 
 export const getContractsForChainId = (chainId: string) => {
   const networkName = getNetworkNameFromChainId(chainId);
-  const { chocofactory, chocomold, rpc, explore } = networkConfig[networkName];
+  const { letters, rpc, explore } = networkConfig[networkName];
   const provider = new ethers.providers.JsonRpcProvider(rpc);
-  const chocomoldContract = new ethers.Contract(chocomold, chocomoldAbi, provider) as Chocomold;
-  const chocofactoryContract = new ethers.Contract(chocofactory, chocofactoryAbi, provider) as Chocofactory;
-  return { chocofactoryContract, chocomoldContract, explore, provider };
+  const lettersContract = new ethers.Contract(letters, lettersAbi, provider) as Letters;
+  return { lettersContract, explore, provider };
 };

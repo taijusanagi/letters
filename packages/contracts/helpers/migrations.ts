@@ -6,7 +6,7 @@ import networks from "../networks.json";
 import { CONTRACT_NAME, CONTRACT_SYMBOL } from "./constants";
 import { NetworkName } from "./types";
 
-export const filePath = "../network.json";
+export const filePath = "../networks.json";
 export const networkName = hre.network.name == "hardhat" ? "localhost" : <NetworkName>hre.network.name;
 export const gasPrice = process.env.GAS_PRICE ? parseInt(process.env.GAS_PRICE) : networks[networkName].defaultGasPrice; //10 gwei
 

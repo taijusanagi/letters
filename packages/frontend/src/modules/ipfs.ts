@@ -1,6 +1,4 @@
-import canonicalize from "canonicalize";
 import createClient from "ipfs-http-client";
-import { Metadata } from "../types";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ipfsOnlyHash = require("ipfs-only-hash");
@@ -14,9 +12,8 @@ export const ipfs = createClient({
   protocol: "https",
 });
 
-export const metadataToIpfsCid = async (metadata: Metadata) => {
-  const canonicalizeMetadata = canonicalize(metadata) as string;
-  const canonicalizeMetadataBuffer = Buffer.from(canonicalizeMetadata);
+export const metadataToIpfsCid = async (metadata: any) => {
+  const canonicalizeMetadataBuffer = Buffer.from(JSON.stringify(metadata));
   const cid = await ipfsOnlyHash.of(canonicalizeMetadataBuffer);
   return cid;
 };

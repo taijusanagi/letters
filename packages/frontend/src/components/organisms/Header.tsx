@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import { name, mainIcon, personIcon, connectIcon, errorIcon } from "../../configs.json";
 import { shortenAddress } from "../../modules/util";
 
 import { Button } from "../atoms/Button";
@@ -29,22 +28,16 @@ export const Header: React.FC = () => {
     <header>
       <div className="relative h-20">
         <Link to="/">
-          <div className="px-4 py-8 absolute left-0 font-bold">
-            {name}
-            <span className="ml-1">{mainIcon}</span>
-          </div>
+          <div className="px-4 py-8 absolute left-0 font-bold">Letters.</div>
         </Link>
         <div className="px-4 py-6 absolute right-0">
           {!userAddress ? (
-            <Button onClick={signIn} type="tertiary">
-              Connect<span className="ml-2">{connectIcon}</span>
+            <Button onClick={signIn} type="secondary">
+              Connect
             </Button>
           ) : (
             <Link to="/mypage">
-              <Button type="tertiary">
-                {shortenAddress(userAddress)}
-                <span className="ml-2">{personIcon}</span>
-              </Button>
+              <Button type="secondary">{shortenAddress(userAddress)}</Button>
             </Link>
           )}
         </div>

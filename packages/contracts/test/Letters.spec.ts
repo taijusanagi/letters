@@ -7,6 +7,12 @@ import { ethers } from "hardhat";
 import { CONTRACT_NAME, CONTRACT_SYMBOL } from "../helpers/constants";
 import { deployLetters } from "../helpers/migrations";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const IPFSMini = require("ipfs-mini");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ipfsOnlyHash = require("ipfs-only-hash");
+const ipfsMini = new IPFSMini({ host: "ipfs.infura.io", port: 5001, protocol: "https" });
+
 chai.use(solidity);
 const { expect } = chai;
 
@@ -69,37 +75,45 @@ describe("Letters", function () {
     expect(await lettersContract.getDescription(firstTokenId)).to.equal(expected);
   });
 
-  // it("getMetadata", async function () {
-  //   await lettersContract.sendLetter(to.address, letterBytes32);
-  //   const name = await lettersContract.getName(firstTokenId);
-  //   const description = await lettersContract.getDescription(firstTokenId);
-  //   const image_data = await lettersContract.getImageData(firstTokenId);
-  //   const expectedMetadata = {
-  //     name,
-  //     description,
-  //     image_data,
-  //   };
-  //   const expected = JSON.stringify(expectedMetadata);
-  //   expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
-  // });
+  it("getImageData", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const expected = fs.readFileSync(path.join(__dirname, "../sample.svg")).toString().trim();
+    const rawResult = await lettersContract.getImageData(firstTokenId);
+    const result = rawResult.replace(/\\/g, "");
+    expect(result).to.equal(expected);
+  });
+
+  it("getMetadata", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const name = await lettersContract.getName(firstTokenId);
+    const description = await lettersContract.getDescription(firstTokenId);
+    const image_data = await lettersContract.getImageData(firstTokenId);
+    const formated = image_data.replace(/\\/g, "");
+    const expectedMetadata = {
+      name,
+      description,
+      image_data: formated,
+    };
+    const expected = JSON.stringify(expectedMetadata);
+    expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
+  });
 
   it("tokenURI", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    // const name = await lettersContract.getName(firstTokenId);
-    // const description = await lettersContract.getDescription(firstTokenId);
-    // const image_data = await lettersContract.getImageData(firstTokenId);
-    // const expectedMetadata = {
-    //   name,
-    //   description,
-    //   image_data,
-    // };
-    // console.log(expectedMetadata);
-    // const expected = JSON.stringify(expectedMetadata);
-    // expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
-    console.log(await lettersContract.tokenURI(firstTokenId));
+    const metadata = await lettersContract.getMetaData(firstTokenId);
+    const cid = await ipfsOnlyHash.of(Buffer.from(metadata));
+    expect(await lettersContract.tokenURI(firstTokenId)).to.equal(`ipfs://${cid}`);
   });
 
-  // this is skiped for usual test because it takes too long to execute
+  // this is only used once to upload content to ipfs
+  it.skip("upload metadata to ipfs ", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const metadata = await lettersContract.getMetaData(firstTokenId);
+    const cid = await ipfsMini.add(metadata);
+    console.log(`ipfs://${cid}`);
+  });
+
+  // this is only used once to make sure supply limit is working
   it.skip("cannot mint more than limit", async function () {
     for (let i = 0; i <= lastTokenId + 1; i++) {
       console.log(i);

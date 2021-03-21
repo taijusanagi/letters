@@ -1,9 +1,5 @@
 import React from "react";
 import { atom, useRecoilState } from "recoil";
-
-import { signatureMessage } from "../../../../common/config";
-
-import { auth, functions } from "../../modules/firebase";
 import { initializeWeb3Modal, getWeb3, getEthersSigner, clearWeb3Modal } from "../../modules/web3";
 import { LoadingOverlay } from "../molecules/LoadingOverlay";
 import { MessageModalProps } from "../molecules/MessageModal";
@@ -31,12 +27,10 @@ export const messageModalPropsAtom = atom<MessageModalProps | undefined>({
   key: "messageModalProps",
   default: undefined,
 });
-
 export const notificationToastPropsAtom = atom<NotificationToastProps | undefined>({
   key: "notificationToastProps",
   default: undefined,
 });
-
 export const signerAddressAtom = atom({
   key: "signerAddress",
   default: "",
@@ -88,19 +82,9 @@ export const useWallet = () => {
 
   const connectWallet = async () => {
     const provider = await initializeWeb3Modal();
-    const signerAddress = provider.selectedAddress.toLowerCase();
     const web3 = await getWeb3(provider);
     const signer = await getEthersSigner(provider);
-    if (userAddress != signerAddress) {
-      const message = signatureMessage;
-      const signature = await web3.eth.personal.sign(`${message}${signerAddress}`, signerAddress, "");
-      const response = await functions.httpsCallable("connectWallet")({
-        signature,
-        signerAddress,
-      });
-      auth.signInWithCustomToken(response.data);
-      setSignerAddressState(signerAddress);
-    }
+    const signerAddress = await signer.getAddress();
     return { web3, signer, signerAddress };
   };
 

@@ -16,7 +16,7 @@ export const Hero: React.FC = () => {
                 </Button>
               </Link>
               <a href="https://docs.chocomint.app">
-                <Button type="tertiary">
+                <Button type="secondary">
                   Docs<span className="ml-2">📝</span>
                 </Button>
               </a>

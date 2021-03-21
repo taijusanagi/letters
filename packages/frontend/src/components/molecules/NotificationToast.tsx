@@ -1,7 +1,6 @@
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { errorIcon, confirmIcon } from "../../configs.json";
 
 export interface NotificationToastProps {
   type: "error" | "success";
@@ -18,13 +17,13 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ type, text
     }, 0);
     setTimeout(() => {
       setActive(false);
-    }, 3400);
+    }, 3900);
     setTimeout(() => {
       onClickDismiss();
-    }, 3500);
+    }, 4000);
   }, []);
 
-  const bgColor = type == "error" ? "bg-red-100" : "bg-green-100";
+  const bgColor = type == "error" ? "bg-red-50" : "bg-white";
 
   return (
     <div
@@ -33,7 +32,6 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ type, text
     >
       <div className="px-2 pt-2 pb-4">
         <div className="flex items-start">
-          <div>{type == "error" ? errorIcon : confirmIcon}</div>
           <div className="ml-3 w-0 flex-1 pt-0.5">
             <p className="text-sm font-bold text-secondary">{type == "error" ? "Error" : "Success"}</p>
             <p className="mt-2 text-xs text-secondary">{text}</p>

@@ -36,10 +36,10 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <div className="w-6/12">
                 {typeof onClickConfirm == "string" ? (
                   <Link to={onClickConfirm}>
-                    <Button type="tertiary">{buttonText}</Button>
+                    <Button type="secondary">{buttonText}</Button>
                   </Link>
                 ) : (
-                  <Button onClick={onClickConfirm} type="tertiary">
+                  <Button onClick={onClickConfirm} type="secondary">
                     {buttonText}
                   </Button>
                 )}

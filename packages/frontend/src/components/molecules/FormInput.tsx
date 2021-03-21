@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Label } from "../atoms/Label";
-
 export interface FormInputProps {
   type: "text" | "number";
   label: string;
@@ -19,7 +17,7 @@ export const FormInput: React.FC<FormInputProps> = ({ type, value, label, error,
 
   return (
     <div>
-      <Label text={label} />
+      <label>{label}</label>
       <input
         onChange={handleChange}
         value={value}
