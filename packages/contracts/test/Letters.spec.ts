@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import * as chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { ethers } from "hardhat";
@@ -66,24 +69,34 @@ describe("Letters", function () {
     expect(await lettersContract.getDescription(firstTokenId)).to.equal(expected);
   });
 
-  it("getImageData", async function () {
-    await lettersContract.sendLetter(to.address, letterBytes32);
-    const expected = "image";
-    expect(await lettersContract.getImageData(firstTokenId)).to.equal(expected);
-  });
+  // it("getMetadata", async function () {
+  //   await lettersContract.sendLetter(to.address, letterBytes32);
+  //   const name = await lettersContract.getName(firstTokenId);
+  //   const description = await lettersContract.getDescription(firstTokenId);
+  //   const image_data = await lettersContract.getImageData(firstTokenId);
+  //   const expectedMetadata = {
+  //     name,
+  //     description,
+  //     image_data,
+  //   };
+  //   const expected = JSON.stringify(expectedMetadata);
+  //   expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
+  // });
 
-  it("getMetadata", async function () {
+  it("tokenURI", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    const name = await lettersContract.getName(firstTokenId);
-    const description = await lettersContract.getDescription(firstTokenId);
-    const image_data = await lettersContract.getImageData(firstTokenId);
-    const expectedMetadata = {
-      name,
-      description,
-      image_data,
-    };
-    const expected = JSON.stringify(expectedMetadata);
-    expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
+    // const name = await lettersContract.getName(firstTokenId);
+    // const description = await lettersContract.getDescription(firstTokenId);
+    // const image_data = await lettersContract.getImageData(firstTokenId);
+    // const expectedMetadata = {
+    //   name,
+    //   description,
+    //   image_data,
+    // };
+    // console.log(expectedMetadata);
+    // const expected = JSON.stringify(expectedMetadata);
+    // expect(await lettersContract.getMetaData(firstTokenId)).to.equal(expected);
+    console.log(await lettersContract.tokenURI(firstTokenId));
   });
 
   // this is skiped for usual test because it takes too long to execute

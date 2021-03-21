@@ -1,4 +1,1 @@
-<svg width="350" height="350" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="350" height="350" fill="purple" fill-opacity="0.5" />
-  <text x="175" y="175" text-anchor="middle" font-family="sans-serif" font-size="20">Thank you!</text>
-</svg>
+<svg width="350" height="350" xmlns="http://www.w3.org/2000/svg"><text x="175" y="175" text-anchor="middle" font-family="sans-serif" font-size="20">Hi.</text></svg>

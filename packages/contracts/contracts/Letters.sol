@@ -10,6 +10,8 @@ import "./libraries/TrimStrings.sol";
 
 contract Letters is ERC721, IHasSecondarySaleFees {
     using LiteralStrings for bytes;
+    using IPFS for bytes;
+    using IPFS for bytes32;
     using TrimStrings for bytes32;
     using Counters for Counters.Counter;
 
@@ -79,7 +81,8 @@ contract Letters is ERC721, IHasSecondarySaleFees {
 
     function getImageData(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
-        return "image";
+        return
+            '<svg width=\\"350\\" height=\\"350\\" xmlns=\\"http://www.w3.org/2000/svg\\"><text x=\\"175\\" y=\\"175\\" text-anchor=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"20\\">Hi.</text></svg>';
     }
 
     function getMetaData(uint256 _tokenId) public view returns (string memory) {
@@ -96,5 +99,11 @@ contract Letters is ERC721, IHasSecondarySaleFees {
                     '"}'
                 )
             );
+    }
+
+    function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+        require(_exists(_tokenId), "query for nonexistent token");
+        bytes memory metadata = abi.encodePacked(getMetaData(_tokenId));
+        return string(metadata.toIpfsDigest().addSha256FunctionCodePrefix().toBase58().addIpfsBaseUrlPrefix());
     }
 }

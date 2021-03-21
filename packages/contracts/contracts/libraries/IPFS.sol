@@ -2,6 +2,12 @@
 pragma solidity ^0.8.0;
 
 library IPFS {
+    function toIpfsDigest(bytes memory input) internal view returns (bytes32) {
+        bytes memory len = lengthEncode(input.length);
+        bytes memory len2 = lengthEncode(input.length + 4 + 2 * len.length);
+        return sha256(abi.encodePacked(hex"0a", len2, hex"080212", len, input, hex"18", len));
+    }
+
     function addSha256FunctionCodePrefix(bytes32 _input) internal pure returns (bytes memory) {
         return abi.encodePacked(hex"1220", _input);
     }
@@ -33,5 +39,24 @@ library IPFS {
             output[k] = alphabet[digits[digitlength - 1 - k]];
         }
         return output;
+    }
+
+    function lengthEncode(uint256 length) private view returns (bytes memory) {
+        if (length < 128) {
+            return uintToBinary(length);
+        } else {
+            return abi.encodePacked(uintToBinary((length % 128) + 128), uintToBinary(length / 128));
+        }
+    }
+
+    function uintToBinary(uint256 x) private view returns (bytes memory) {
+        if (x == 0) {
+            return new bytes(0);
+        } else {
+            bytes1 s = bytes1(uint8(x % 256));
+            bytes memory r = new bytes(1);
+            r[0] = s;
+            return abi.encodePacked(uintToBinary(x / 256), r);
+        }
     }
 }
