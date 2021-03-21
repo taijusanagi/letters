@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "letters-prod"
+  },
+  "targets": {
+    "letters-prod": {
+      "hosting": {
+        "production": [
+          "letters-prod"
+        ]
+      }
+    }
+  }
+}

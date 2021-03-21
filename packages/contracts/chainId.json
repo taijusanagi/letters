@@ -1,0 +1,6 @@
+{
+  "1": "mainnet",
+  "4": "rinkeby",
+  "137": "matic",
+  "31337": "localhost"
+}

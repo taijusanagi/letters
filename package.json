@@ -1,0 +1,42 @@
+{
+  "name": "letters.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/**"
+  ],
+  "scripts": {
+    "prepare": "husky install",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.{.ts,.js,tsx,jsx,json,md,sol}\"",
+    "lint": "eslint . --ignore-path .gitignore",
+    "test": "yarn workspace contracts test",
+    "dev": "run-p dev:*",
+    "dev:run-localchain": "yarn workspace contracts run-localchain",
+    "dev:deploy-contract-to-localchain": "wait-on http://localhost:8545 && yarn workspace contracts deploy-contract-to-localchain",
+    "dev:frontend": "wait-on http://localhost:8545 && cross-env REACT_APP_NETWORK_NAME=localhost yarn workspace frontend dev",
+    "dev:storybook": "yarn workspace frontend storybook",
+    "prebuild": "yarn workspace contracts build",
+    "build": "yarn workspace frontend build",
+    "prestart": "yarn build",
+    "start": "firebase serve --only hosting",
+    "predeploy": "yarn build",
+    "deploy": "firebase deploy --only hosting"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.22.0",
+    "firebase-tools": "^9.5.0",
+    "husky": "^5.1.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "1.0.0-beta.5",
+    "ts-generator": "^0.1.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  }
+}
