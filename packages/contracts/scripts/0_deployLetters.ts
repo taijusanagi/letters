@@ -1,6 +1,6 @@
-import { deployFactory } from "../helpers/migrations";
+import { deployLetters } from "../helpers/migrations";
 
-deployFactory()
+deployLetters()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

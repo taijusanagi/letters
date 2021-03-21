@@ -7,7 +7,7 @@ import "hardhat-gas-reporter";
 
 const privateKey = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000"; // this is to avoid hardhat error
 
-import network from "./network.json";
+import network from "./networks.json";
 
 const enableGasReport = !!process.env.ENABLE_GAS_REPORT;
 const enableProduction = process.env.COMPILE_MODE === "production";
@@ -46,5 +46,8 @@ module.exports = {
     enable: enableGasReport,
     currency: "JPY",
     outputFile: process.env.CI ? "gas-report.txt" : undefined,
+  },
+  mocha: {
+    timeout: 200000,
   },
 };
