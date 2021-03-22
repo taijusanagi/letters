@@ -98,7 +98,7 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         return
             string(
                 abi.encodePacked(
-                    '<svg width=\\"600\\" height=\\"315\\" viewBox=\\"0 0 600 315\\" xmlns=\\"http://www.w3.org/2000/svg\\"><rect x=\\"0\\" y=\\"0\\" width=\\"600\\" height=\\"315\\" fill=\\"white\\" /><g><text x=\\"300\\" y=\\"157.5\\" text-anchor=\\"middle\\" dominant-baseline=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"64\\">',
+                    '<svg width=\\"600\\" height=\\"315\\" viewBox=\\"0 0 600 315\\" xmlns=\\"http://www.w3.org/2000/svg\\"><rect x=\\"0\\" y=\\"0\\" width=\\"600\\" height=\\"315\\" fill=\\"white\\" /><g><text x=\\"300\\" y=\\"157.5\\" text-anchor=\\"middle\\" dominant-baseline=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"24\\">',
                     getLetter(_tokenId),
                     '</text><text x=\\"460\\" y=\\"300\\" text-anchor=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"10\\">from: ',
                     getFrom(_tokenId),

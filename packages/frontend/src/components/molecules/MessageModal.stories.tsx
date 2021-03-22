@@ -3,7 +3,6 @@ import { MemoryRouter } from "react-router-dom";
 import { MessageModal, MessageModalProps } from "./MessageModal";
 
 const args: MessageModalProps = {
-  icon: "🎉",
   messageText: "Your NFT is Registered!",
   buttonText: "Check",
 };

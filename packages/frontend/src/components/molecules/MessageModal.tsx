@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { Button } from "../atoms/Button";
 
 export interface MessageModalProps {
-  icon: string;
   messageText: string;
   buttonText?: string;
   onClickConfirm?: () => void;
@@ -13,7 +12,6 @@ export interface MessageModalProps {
 }
 
 export const MessageModal: React.FC<MessageModalProps> = ({
-  icon,
   messageText,
   buttonText,
   onClickConfirm,
@@ -22,7 +20,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   return (
     <div className="fixed z-1 inset-0">
       <div className="flex p-4 items-center justify-center min-h-screen text-center">
-        <div onClick={onClickDismiss} className="absolute inset-0 overflow-hidden bg-black opacity-5"></div>
+        <div onClick={onClickDismiss} className="absolute inset-0 overflow-hidden bg-black opacity-10"></div>
         <div className="bg-white p-6 px-4 transform max-w-lg w-full rounded-md">
           {onClickDismiss && (
             <button onClick={onClickDismiss} className="focus:outline-none absolute right-4 top-2 text-tertiary">
