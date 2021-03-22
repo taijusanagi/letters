@@ -10,7 +10,7 @@
     "chainId": "4",
     "rpc": "https://rinkeby.infura.io/v3/95f65ab099894076814e8526f52c9149",
     "explore": "https://rinkeby.etherscan.io/",
-    "letters": "",
+    "letters": "0x1afCe44bB23353dd0834A2E60a81644D18D2Cfa1",
     "defaultGasPrice": 10000000000
   },
   "bsc": {

@@ -67,7 +67,6 @@ export const useNotificationToast = () => {
   const openNotificationToast = (props: NotificationToastProps) => {
     setNotificationToastProps(props);
     setNotificationToastDisplay(true);
-    console.log("set");
   };
   const closeNotificationToast = () => {
     setNotificationToastDisplay(false);

@@ -9,12 +9,10 @@ import networkConfig from "../../../contracts/networks.json";
 import { Letters } from "../../../contracts/typechain";
 
 export const chainIdLabels =
-  process.env.NODE_ENV == "development"
-    ? ["Rinkeby", "BSC", "Matic", "Mainnet", "Local"]
-    : ["Rinkeby", "BSC", "Matic", "Mainnet"];
+  process.env.NODE_ENV == "development" ? ["Local", "Rinkeby", "Mainnet", "Matic", "BSC"] : ["Mainnet", "Matic", "BSC"];
 
 export const chainIdValues =
-  process.env.NODE_ENV == "development" ? ["4", "56", "137", "1", "31337"] : ["4", "56", "137", "1"];
+  process.env.NODE_ENV == "development" ? ["31337", "4", "1", "137", "56"] : ["1", "137", "56"];
 
 export const providerOptions = {
   walletconnect: {

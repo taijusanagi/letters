@@ -1,8 +1,0 @@
-{
-  "letter": {
-    "token_id": "0",
-    "name": "Hi.",
-    "image_data": "<svg width=\"350\" height=\"350\" xmlns=\"http://www.w3.org/2000/svg\"><text x=\"175\" y=\"175\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"20\">Hi.</text></svg>",
-    "from": "0x84E9445f43995b0C6a4D4C1d40bb123571c2Eb06"
-  }
-}

@@ -33,7 +33,6 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ type, text
       <div className="px-2 pt-2 pb-4">
         <div className="flex items-start">
           <div className="ml-3 w-0 flex-1 pt-0.5">
-            <p className="text-sm font-bold text-secondary">{type == "error" ? "Error" : "Success"}</p>
             <p className="mt-2 text-xs text-secondary">{text}</p>
           </div>
           <div className="ml-4 flex-shrink-0 flex">
