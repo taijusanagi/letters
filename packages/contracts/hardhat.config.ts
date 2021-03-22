@@ -38,6 +38,10 @@ module.exports = {
       url: network.matic.rpc,
       accounts: [privateKey],
     },
+    bsc: {
+      url: network.bsc.rpc,
+      accounts: [privateKey],
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY,

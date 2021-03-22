@@ -4,7 +4,16 @@ import * as path from "path";
 import * as chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { ethers } from "hardhat";
-import { CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, FEE_BPS, LAST_TOKEN_ID } from "../helpers/constants";
+import {
+  CONTRACT_NAME,
+  CONTRACT_SYMBOL,
+  OWNER_ADDRESS,
+  FEE_BPS,
+  LAST_TOKEN_ID,
+  ERC721_INTERFACE_ID,
+  ERC721_METADATA_INTERFACE_ID,
+  HAS_SECONRARY_SALE_FEES,
+} from "../helpers/constants";
 import { deployLetters } from "../helpers/migrations";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,11 +39,17 @@ describe("Letters", function () {
     lettersContract = await deployLetters();
   });
 
-  it("interface check", async function () {
+  it("deploy check", async function () {
     expect(await lettersContract.name()).to.equal(CONTRACT_NAME);
     expect(await lettersContract.symbol()).to.equal(CONTRACT_SYMBOL);
     expect(await lettersContract.getLetter(ownerTokenId)).to.equal(CONTRACT_NAME);
     expect(await lettersContract.ownerOf(ownerTokenId)).to.equal(OWNER_ADDRESS);
+  });
+
+  it("interface check", async function () {
+    expect(await lettersContract.supportsInterface(ERC721_INTERFACE_ID)).to.equal(true);
+    expect(await lettersContract.supportsInterface(ERC721_METADATA_INTERFACE_ID)).to.equal(true);
+    expect(await lettersContract.supportsInterface(HAS_SECONRARY_SALE_FEES)).to.equal(true);
   });
 
   it("mint", async function () {
@@ -63,7 +78,7 @@ describe("Letters", function () {
 
   it("getDescription", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    const expected = `just #${firstTokenId} 32 bytes letter from ${signer.address.toLowerCase()}`;
+    const expected = `just 32 bytes letter from ${signer.address.toLowerCase()}`;
     expect(await lettersContract.getDescription(firstTokenId)).to.equal(expected);
   });
 
@@ -132,7 +147,7 @@ describe("Letters", function () {
 
   // this is only used once to upload content to ipfs
   it.skip("upload metadata to ipfs ", async function () {
-    await lettersContract.sendLetter(to.address, letterBytes32);
+    await lettersContract.sendLetter(to.address, ethers.utils.formatBytes32String(CONTRACT_NAME));
     const metadata = await lettersContract.getMetaData(firstTokenId);
     const cid = await ipfsMini.add(metadata);
     console.log(`ipfs://${cid}`);

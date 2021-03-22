@@ -16,7 +16,7 @@
     "dev:deploy-contract-to-localchain": "wait-on http://localhost:8545 && yarn workspace contracts deploy-contract-to-localchain",
     "dev:frontend": "wait-on http://localhost:8545 && cross-env REACT_APP_NETWORK_NAME=localhost yarn workspace frontend dev",
     "dev:storybook": "yarn workspace frontend storybook",
-    "prebuild": "yarn workspace contracts build",
+    "prebuild": "yarn workspace contracts compile",
     "build": "yarn workspace frontend build",
     "prestart": "yarn build",
     "start": "firebase serve --only hosting",

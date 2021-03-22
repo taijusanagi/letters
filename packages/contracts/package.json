@@ -12,7 +12,8 @@
     "deploy-contract-to-localchain": "hardhat run scripts/0_deployLetters.ts --network localhost",
     "deploy-contract-to-rinkeby": "hardhat run scripts/0_deployLetters.ts --network rinkeby",
     "deploy-contract-to-mainnet": "hardhat run scripts/0_deployLetters.ts --network mainnet",
-    "deploy-contract-to-matic": "hardhat run scripts/0_deployLetters.ts --network matic"
+    "deploy-contract-to-matic": "hardhat run scripts/0_deployLetters.ts --network matic",
+    "deploy-contract-to-bsc": "hardhat run scripts/0_deployLetters.ts --network bsc"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",

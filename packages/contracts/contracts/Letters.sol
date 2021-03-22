@@ -90,7 +90,7 @@ contract Letters is ERC721, IHasSecondarySaleFees {
 
     function getDescription(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
-        return string(abi.encodePacked("just #", _tokenId.toString(), " 32 bytes letter from ", getFrom(_tokenId)));
+        return string(abi.encodePacked("just 32 bytes letter from ", getFrom(_tokenId)));
     }
 
     function getImageData(uint256 _tokenId) public view returns (string memory) {
@@ -98,10 +98,8 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         return
             string(
                 abi.encodePacked(
-                    '<svg width=\\"600\\" height=\\"315\\" viewBox=\\"0 0 600 315\\" xmlns=\\"http://www.w3.org/2000/svg\\"><rect x=\\"0\\" y=\\"0\\" width=\\"600\\" height=\\"315\\" fill=\\"white\\" /><g><text x=\\"300\\" y=\\"157.5\\" text-anchor=\\"middle\\" dominant-baseline=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"24\\">',
+                    '<svg width=\\"600\\" height=\\"315\\" viewBox=\\"0 0 600 315\\" xmlns=\\"http://www.w3.org/2000/svg\\"><rect x=\\"0\\" y=\\"0\\" width=\\"600\\" height=\\"315\\" fill=\\"white\\" /><g><text x=\\"300\\" y=\\"157.5\\" text-anchor=\\"middle\\" dominant-baseline=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"24\\" fill=\\"#1F2937\\">',
                     getLetter(_tokenId),
-                    '</text><text x=\\"460\\" y=\\"300\\" text-anchor=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"10\\">from: ',
-                    getFrom(_tokenId),
                     "</text></g></svg>"
                 )
             );
@@ -139,5 +137,9 @@ contract Letters is ERC721, IHasSecondarySaleFees {
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
         return string(abi.encodePacked(getCid(_tokenId)).addIpfsBaseUrlPrefix());
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IHasSecondarySaleFees).interfaceId || super.supportsInterface(interfaceId);
     }
 }

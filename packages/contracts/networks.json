@@ -3,28 +3,28 @@
     "chainId": "1",
     "rpc": "https://mainnet.infura.io/v3/95f65ab099894076814e8526f52c9149",
     "explore": "https://etherscan.io/",
-    "letters": "",
-    "defaultGasPrice": 100000000000
+    "letters": "0x3481508C79aCF94A04BEb6a7C05fF557D70fB40c",
+    "defaultGasPrice": 130000000000
   },
   "rinkeby": {
     "chainId": "4",
     "rpc": "https://rinkeby.infura.io/v3/95f65ab099894076814e8526f52c9149",
     "explore": "https://rinkeby.etherscan.io/",
-    "letters": "0x1afCe44bB23353dd0834A2E60a81644D18D2Cfa1",
+    "letters": "0xc2337F7BdA2Df3861fF9DD17c2df1eb26a7e4729",
     "defaultGasPrice": 10000000000
   },
   "bsc": {
     "chainId": "56",
     "rpc": "https://bsc-dataseed.binance.org/",
     "explore": "https://bscscan.com/",
-    "letters": "",
+    "letters": "0x7C7732CfaC30859f9E32F48c308B9C54aDfeb2F7",
     "defaultGasPrice": 10000000000
   },
   "matic": {
     "chainId": "137",
     "rpc": "https://rpc-mainnet.maticvigil.com/",
     "explore": "https://explorer-mainnet.maticvigil.com/",
-    "letters": "",
+    "letters": "0x8dDcacCa83B732Fc2aD15a4d2Ab90874e5b9B349",
     "defaultGasPrice": 1000000000
   },
   "localhost": {

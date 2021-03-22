@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import React from "react";
 import { ChainId } from "../../../../contracts/helpers/types";
+import { ipfs } from "../../modules/ipfs";
 import { chainIdLabels, chainIdValues, getContractsForChainId, getNetworkNameFromChainId } from "../../modules/web3";
 
 import { Button } from "../atoms/Button";
@@ -38,7 +39,7 @@ export const Letter: React.FC = () => {
 
   const sendLetter = async () => {
     if (!validateForm()) return;
-    const { signer } = await connectWallet();
+    const { signer, signerAddress } = await connectWallet();
     const signerNetwork = await signer.provider.getNetwork();
     if (chainId != signerNetwork.chainId.toString()) {
       const networkName = getNetworkNameFromChainId(chainId);
@@ -48,6 +49,13 @@ export const Letter: React.FC = () => {
     openLoadingOverlay();
     try {
       const { lettersContract, explore } = getContractsForChainId(chainId as ChainId);
+      const from = signerAddress.toLocaleLowerCase();
+      const metadata = {
+        name: letter,
+        description: `just 32 bytes letter from ${from}`,
+        image_data: `<svg width="600" height="315" viewBox="0 0 600 315" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="600" height="315" fill="white" /><g><text x="300" y="157.5" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="24" fill="#1F2937">${letter}</text></g></svg>`,
+      };
+      await ipfs.add(JSON.stringify(metadata));
       const { hash } = await lettersContract
         .connect(signer)
         .sendLetter(sendTo, ethers.utils.formatBytes32String(letter));
