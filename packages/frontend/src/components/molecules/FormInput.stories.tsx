@@ -2,7 +2,7 @@ import React from "react";
 import { FormInput, FormInputProps } from "./FormInput";
 
 const args: FormInputProps = {
-  label: "label",
+  placeholder: "label",
   type: "text",
   value: "value",
   setState: () => {

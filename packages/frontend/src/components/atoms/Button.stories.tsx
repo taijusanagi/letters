@@ -2,8 +2,7 @@ import React from "react";
 import { Button, ButtonProps } from "./Button";
 
 const args: ButtonProps = {
-  type: "primary",
-  children: "Body",
+  children: "Send",
 };
 
 export default {

@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./extentions/IHasSecondarySaleFees.sol";
 import "./libraries/Bytes32.sol";
 import "./libraries/IPFS.sol";
@@ -17,12 +16,9 @@ contract Letters is ERC721, IHasSecondarySaleFees {
     using IPFS for bytes32;
     using TrimStrings for bytes32;
     using Strings for uint256;
-    using SafeMath for uint256;
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdTracker;
-    Counters.Counter private _calculationTracker;
-
     bytes32 private _currentProvenanceHash;
 
     mapping(uint256 => bytes32) public letterMemory;
@@ -42,8 +38,6 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         lastTokenId = _lastTokenId;
         feeBps = _feeBps;
         sendLetter(_owner, _name.toBytes32());
-        // initial provenance calculation
-        _currentProvenanceHash = getProvenance(0);
     }
 
     function LETTERS_PROVENANCE() public view returns (bytes32) {
@@ -56,15 +50,6 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         return ownerOf(0);
     }
 
-    function calculateProvenance(uint256 _calculateTo) public {
-        uint256 currentCalculated = _tokenIdTracker.current();
-        require(currentCalculated < _calculateTo, "already calculated");
-        require(_calculateTo <= lastTokenId, "only calculate to supplied letter");
-        for (uint256 i = currentCalculated; i < _calculateTo; i++) {
-            _currentProvenanceHash = sha256(abi.encodePacked(_currentProvenanceHash, getProvenance(i)));
-        }
-    }
-
     function sendLetter(address _to, bytes32 _letter) public {
         uint256 tokenId = _tokenIdTracker.current();
         require(tokenId <= lastTokenId, "all letters have been sent");
@@ -72,6 +57,12 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         fromMemory[tokenId] = payable(msg.sender);
         _mint(_to, tokenId);
         _tokenIdTracker.increment();
+        // this takes extra 50000 gas but it is required to get final provenance for large number of letters
+        if (_currentProvenanceHash == "") {
+            _currentProvenanceHash = getProvenance(tokenId);
+        } else {
+            _currentProvenanceHash = sha256(abi.encodePacked(_currentProvenanceHash, getProvenance(tokenId)));
+        }
     }
 
     function getFeeBps(uint256 _tokenId) external view override returns (uint256[] memory) {

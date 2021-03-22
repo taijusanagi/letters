@@ -22,9 +22,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   return (
     <div className="fixed z-1 inset-0">
       <div className="flex p-4 items-center justify-center min-h-screen text-center">
-        <div onClick={onClickDismiss} className="absolute inset-0 overflow-hidden bg-black opacity-40"></div>
+        <div onClick={onClickDismiss} className="absolute inset-0 overflow-hidden bg-black opacity-5"></div>
         <div className="bg-white p-6 px-4 transform max-w-lg w-full rounded-md">
-          <p className="focus:outline-none absolute left-4 top-2 text-tertiary">{icon}</p>
           {onClickDismiss && (
             <button onClick={onClickDismiss} className="focus:outline-none absolute right-4 top-2 text-tertiary">
               <FontAwesomeIcon icon={faTimes} />
@@ -36,12 +35,10 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <div className="w-6/12">
                 {typeof onClickConfirm == "string" ? (
                   <Link to={onClickConfirm}>
-                    <Button type="secondary">{buttonText}</Button>
+                    <Button>{buttonText}</Button>
                   </Link>
                 ) : (
-                  <Button onClick={onClickConfirm} type="secondary">
-                    {buttonText}
-                  </Button>
+                  <Button onClick={onClickConfirm}>{buttonText}</Button>
                 )}
               </div>
             </div>

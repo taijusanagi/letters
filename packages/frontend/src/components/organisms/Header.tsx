@@ -31,15 +31,7 @@ export const Header: React.FC = () => {
           <div className="px-4 py-8 absolute left-0 font-bold">Letters.</div>
         </Link>
         <div className="px-4 py-6 absolute right-0">
-          {!userAddress ? (
-            <Button onClick={signIn} type="secondary">
-              Connect
-            </Button>
-          ) : (
-            <Link to="/mypage">
-              <Button type="secondary">{shortenAddress(userAddress)}</Button>
-            </Link>
-          )}
+          {!userAddress ? <Button onClick={signIn}>Connect</Button> : <Button>{shortenAddress(userAddress)}</Button>}
         </div>
       </div>
     </header>

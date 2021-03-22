@@ -4,7 +4,7 @@ import * as path from "path";
 import * as chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { ethers } from "hardhat";
-import { CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, FEE_BPS, SUPPLY_LIMIT } from "../helpers/constants";
+import { CONTRACT_NAME, CONTRACT_SYMBOL, OWNER_ADDRESS, FEE_BPS, LAST_TOKEN_ID } from "../helpers/constants";
 import { deployLetters } from "../helpers/migrations";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -111,11 +111,23 @@ describe("Letters", function () {
     expect(await lettersContract.tokenURI(firstTokenId)).to.equal(`ipfs://${cid}`);
   });
 
-  it("calculateProvenance", async function () {
-    await lettersContract.sendLetter(to.address, letterBytes32);
-    const metadata = await lettersContract.getMetaData(firstTokenId);
-    const cid = await ipfsOnlyHash.of(Buffer.from(metadata));
-    expect(await lettersContract.tokenURI(firstTokenId)).to.equal(`ipfs://${cid}`);
+  // this is only used once to make sure supply limit is working
+  it("cannot mint more than limit and provenence is correct", async function () {
+    for (let i = 1; i <= LAST_TOKEN_ID; i++) {
+      const loopedLetterBytes = ethers.utils.formatBytes32String(i.toString());
+      await lettersContract.sendLetter(to.address, loopedLetterBytes);
+      if (i == LAST_TOKEN_ID) {
+        await expect(lettersContract.sendLetter(to.address, loopedLetterBytes)).to.revertedWith(
+          "all letters have been sent"
+        );
+      }
+    }
+    let concatenated = await lettersContract.getProvenance(0);
+    for (let i = 1; i <= LAST_TOKEN_ID; i++) {
+      const provenence = await lettersContract.getProvenance(i);
+      concatenated = ethers.utils.sha256(concatenated + provenence.substring(2, 66));
+    }
+    expect(await lettersContract.LETTERS_PROVENANCE()).to.equal(concatenated);
   });
 
   // this is only used once to upload content to ipfs
@@ -124,21 +136,5 @@ describe("Letters", function () {
     const metadata = await lettersContract.getMetaData(firstTokenId);
     const cid = await ipfsMini.add(metadata);
     console.log(`ipfs://${cid}`);
-  });
-
-  // this is only used once to make sure supply limit is working
-  it.skip("cannot mint more than limit", async function () {
-    for (let i = 1; i < SUPPLY_LIMIT + 1; i++) {
-      console.log("mint", i);
-      const loopedLetterBytes = ethers.utils.formatBytes32String(i.toString());
-      await lettersContract.sendLetter(to.address, loopedLetterBytes);
-    }
-    let concatenated = await lettersContract.getProvenance(0);
-    for (let i = 1; i <= SUPPLY_LIMIT; i++) {
-      console.log("provenance", i);
-      const provenence = await lettersContract.getProvenance(i);
-      concatenated = ethers.utils.sha256(concatenated + provenence.substring(2, 66));
-    }
-    expect(await lettersContract.LETTERS_PROVENANCE()).to.equal(concatenated);
   });
 });
