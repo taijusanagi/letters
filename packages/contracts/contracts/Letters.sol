@@ -3,13 +3,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./extentions/IHasSecondarySaleFees.sol";
 import "./libraries/Bytes32.sol";
 import "./libraries/IPFS.sol";
 import "./libraries/LiteralStrings.sol";
 import "./libraries/TrimStrings.sol";
-
-import "hardhat/console.sol";
 
 contract Letters is ERC721, IHasSecondarySaleFees {
     using LiteralStrings for bytes;
@@ -17,52 +16,58 @@ contract Letters is ERC721, IHasSecondarySaleFees {
     using IPFS for bytes;
     using IPFS for bytes32;
     using TrimStrings for bytes32;
+    using Strings for uint256;
+    using SafeMath for uint256;
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdTracker;
+    Counters.Counter private _calculationTracker;
+
+    bytes32 private _currentProvenanceHash;
 
     mapping(uint256 => bytes32) public letterMemory;
     mapping(uint256 => address payable) public fromMemory;
-    mapping(bytes32 => bool) public letterHasBeenSent;
 
-    mapping(address => bool) public receiveBoxClosed;
-
-    uint256 public supplyLimit;
+    uint256 public lastTokenId;
     uint256[] public feeBps;
 
     constructor(
         string memory _name,
         string memory _symbol,
         address _owner,
-        uint256 _supplyLimit,
+        uint256 _lastTokenId,
         uint256[] memory _feeBps
     ) ERC721(_name, _symbol) {
         require(bytes(_name).length < 32, "name too long");
-        supplyLimit = _supplyLimit;
+        lastTokenId = _lastTokenId;
         feeBps = _feeBps;
         sendLetter(_owner, _name.toBytes32());
+        // initial provenance calculation
+        _currentProvenanceHash = getProvenance(0);
     }
 
     function LETTERS_PROVENANCE() public view returns (bytes32) {
         uint256 currentSupply = _tokenIdTracker.current();
-        require(currentSupply > supplyLimit, "provenance not determined");
-        bytes32 concatenated = getProvenance(0);
-        for (uint256 i = 1; i <= supplyLimit; i++) {
-            concatenated = sha256(abi.encodePacked(concatenated, getProvenance(i)));
-        }
-        return concatenated;
+        require(currentSupply > lastTokenId, "provenance not determined");
+        return _currentProvenanceHash;
     }
 
     function owner() public view virtual returns (address) {
         return ownerOf(0);
     }
 
+    function calculateProvenance(uint256 _calculateTo) public {
+        uint256 currentCalculated = _tokenIdTracker.current();
+        require(currentCalculated < _calculateTo, "already calculated");
+        require(_calculateTo <= lastTokenId, "only calculate to supplied letter");
+        for (uint256 i = currentCalculated; i < _calculateTo; i++) {
+            _currentProvenanceHash = sha256(abi.encodePacked(_currentProvenanceHash, getProvenance(i)));
+        }
+    }
+
     function sendLetter(address _to, bytes32 _letter) public {
         uint256 tokenId = _tokenIdTracker.current();
-        require(tokenId <= supplyLimit, "all letters have been sent");
-        require(!letterHasBeenSent[_letter], "letter has been sent");
-        require(_to != msg.sender, "letter cannot sent to yourself");
-        letterHasBeenSent[_letter] = true;
+        require(tokenId <= lastTokenId, "all letters have been sent");
         letterMemory[tokenId] = _letter;
         fromMemory[tokenId] = payable(msg.sender);
         _mint(_to, tokenId);
@@ -82,20 +87,33 @@ contract Letters is ERC721, IHasSecondarySaleFees {
         return feeRecipients;
     }
 
-    function getName(uint256 _tokenId) public view returns (string memory) {
+    function getLetter(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
         return letterMemory[_tokenId].toString();
     }
 
+    function getFrom(uint256 _tokenId) public view returns (string memory) {
+        require(_exists(_tokenId), "query for nonexistent token");
+        return abi.encodePacked(fromMemory[_tokenId]).toLiteralString();
+    }
+
     function getDescription(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
-        return string(abi.encodePacked("32bytes from ", abi.encodePacked(fromMemory[_tokenId]).toLiteralString()));
+        return string(abi.encodePacked("just #", _tokenId.toString(), " 32 bytes letter from ", getFrom(_tokenId)));
     }
 
     function getImageData(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
         return
-            '<svg width=\\"350\\" height=\\"350\\" xmlns=\\"http://www.w3.org/2000/svg\\"><text x=\\"175\\" y=\\"175\\" text-anchor=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"20\\">Hi.</text></svg>';
+            string(
+                abi.encodePacked(
+                    '<svg width=\\"600\\" height=\\"315\\" viewBox=\\"0 0 600 315\\" xmlns=\\"http://www.w3.org/2000/svg\\"><rect x=\\"0\\" y=\\"0\\" width=\\"600\\" height=\\"315\\" fill=\\"white\\" /><g><text x=\\"300\\" y=\\"157.5\\" text-anchor=\\"middle\\" dominant-baseline=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"64\\">',
+                    getLetter(_tokenId),
+                    '</text><text x=\\"460\\" y=\\"300\\" text-anchor=\\"middle\\" font-family=\\"sans-serif\\" font-size=\\"10\\">from: ',
+                    getFrom(_tokenId),
+                    "</text></g></svg>"
+                )
+            );
     }
 
     function getMetaData(uint256 _tokenId) public view returns (string memory) {
@@ -104,7 +122,7 @@ contract Letters is ERC721, IHasSecondarySaleFees {
             string(
                 abi.encodePacked(
                     '{"name":"',
-                    getName(_tokenId),
+                    getLetter(_tokenId),
                     '","description":"',
                     getDescription(_tokenId),
                     '","image_data":"',
@@ -121,7 +139,10 @@ contract Letters is ERC721, IHasSecondarySaleFees {
 
     function getCid(uint256 _tokenId) public view returns (string memory) {
         require(_exists(_tokenId), "query for nonexistent token");
-        return string(abi.encodePacked(getMetaData(_tokenId)).toIpfsDigest().addSha256FunctionCodePrefix().toBase58());
+        return
+            string(
+                abi.encodePacked(getMetaData(_tokenId)).toIpfsDigest().addSha256FunctionCodePrefixToDigest().toBase58()
+            );
     }
 
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {

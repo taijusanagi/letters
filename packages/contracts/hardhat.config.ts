@@ -48,6 +48,6 @@ module.exports = {
     outputFile: process.env.CI ? "gas-report.txt" : undefined,
   },
   mocha: {
-    timeout: 200000,
+    timeout: 2000000,
   },
 };

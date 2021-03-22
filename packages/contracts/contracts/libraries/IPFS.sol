@@ -8,7 +8,7 @@ library IPFS {
         return sha256(abi.encodePacked(hex"0a", len2, hex"080212", len, input, hex"18", len));
     }
 
-    function addSha256FunctionCodePrefix(bytes32 _input) internal pure returns (bytes memory) {
+    function addSha256FunctionCodePrefixToDigest(bytes32 _input) internal pure returns (bytes memory) {
         return abi.encodePacked(hex"1220", _input);
     }
 

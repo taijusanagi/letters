@@ -20,7 +20,7 @@ describe("Letters", function () {
   let signer, to;
   let lettersContract;
 
-  const letterString = "Hi.";
+  const letterString = "Letters.";
   const letterBytes32 = ethers.utils.formatBytes32String(letterString);
   const ownerTokenId = 0;
   const firstTokenId = 1;
@@ -33,18 +33,13 @@ describe("Letters", function () {
   it("interface check", async function () {
     expect(await lettersContract.name()).to.equal(CONTRACT_NAME);
     expect(await lettersContract.symbol()).to.equal(CONTRACT_SYMBOL);
-    expect(await lettersContract.getName(ownerTokenId)).to.equal(CONTRACT_NAME);
+    expect(await lettersContract.getLetter(ownerTokenId)).to.equal(CONTRACT_NAME);
     expect(await lettersContract.ownerOf(ownerTokenId)).to.equal(OWNER_ADDRESS);
   });
 
   it("mint", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
     expect(await lettersContract.ownerOf(firstTokenId)).to.equal(to.address);
-  });
-
-  it("cannot mint same letter", async function () {
-    await lettersContract.sendLetter(to.address, letterBytes32);
-    await expect(lettersContract.sendLetter(to.address, letterBytes32)).to.revertedWith("letter has been sent");
   });
 
   it("getFeeBps", async function () {
@@ -61,14 +56,14 @@ describe("Letters", function () {
     expect(feeBps[1]).to.equal(signer.address);
   });
 
-  it("getName", async function () {
+  it("getLetter", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    expect(await lettersContract.getName(firstTokenId)).to.equal(letterString);
+    expect(await lettersContract.getLetter(firstTokenId)).to.equal(letterString);
   });
 
   it("getDescription", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    const expected = `32bytes from ${signer.address.toLowerCase()}`;
+    const expected = `just #${firstTokenId} 32 bytes letter from ${signer.address.toLowerCase()}`;
     expect(await lettersContract.getDescription(firstTokenId)).to.equal(expected);
   });
 
@@ -82,7 +77,7 @@ describe("Letters", function () {
 
   it("getMetadata", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
-    const name = await lettersContract.getName(firstTokenId);
+    const name = await lettersContract.getLetter(firstTokenId);
     const description = await lettersContract.getDescription(firstTokenId);
     const image_data = await lettersContract.getImageData(firstTokenId);
     const formated = image_data.replace(/\\/g, "");
@@ -116,6 +111,13 @@ describe("Letters", function () {
     expect(await lettersContract.tokenURI(firstTokenId)).to.equal(`ipfs://${cid}`);
   });
 
+  it("calculateProvenance", async function () {
+    await lettersContract.sendLetter(to.address, letterBytes32);
+    const metadata = await lettersContract.getMetaData(firstTokenId);
+    const cid = await ipfsOnlyHash.of(Buffer.from(metadata));
+    expect(await lettersContract.tokenURI(firstTokenId)).to.equal(`ipfs://${cid}`);
+  });
+
   // this is only used once to upload content to ipfs
   it.skip("upload metadata to ipfs ", async function () {
     await lettersContract.sendLetter(to.address, letterBytes32);
@@ -125,7 +127,7 @@ describe("Letters", function () {
   });
 
   // this is only used once to make sure supply limit is working
-  it.only("cannot mint more than limit", async function () {
+  it.skip("cannot mint more than limit", async function () {
     for (let i = 1; i < SUPPLY_LIMIT + 1; i++) {
       console.log("mint", i);
       const loopedLetterBytes = ethers.utils.formatBytes32String(i.toString());
